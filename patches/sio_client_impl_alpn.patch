@@ -1,0 +1,11 @@
+--- /tmp/sio_original.cpp	2026-06-19 21:49:40.399143695 -0500
++++ src/internal/sio_client_impl.cpp	2026-06-19 21:50:25.399425455 -0500
+@@ -8,2 +8,3 @@
+ 
++#include <openssl/ssl.h>
+ #include "sio_client_impl.h"
+@@ -640,2 +641,4 @@
+         
++        SSL_CTX_set_alpn_protos(ctx->native_handle(),
++                                 reinterpret_cast<const unsigned char*>("\x08http/1.1"), 9);
+         return ctx;

@@ -1,0 +1,151 @@
+{
+	"BUILD_DIR" : "/home/hunter/proj/ta/build/_deps/socketio-build/sioclient_autogen",
+	"CMAKE_BINARY_DIR" : "/home/hunter/proj/ta/build",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/hunter/proj/ta/build/_deps/socketio-build",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/hunter/proj/ta/build/_deps/socketio-src",
+	"CMAKE_EXECUTABLE" : "/usr/bin/cmake",
+	"CMAKE_LIST_FILES" : 
+	[
+		"/home/hunter/proj/ta/build/_deps/socketio-src/CMakeLists.txt",
+		"/usr/share/cmake-3.28/Modules/GNUInstallDirs.cmake",
+		"/usr/share/cmake-3.28/Modules/FindThreads.cmake",
+		"/usr/share/cmake-3.28/Modules/CheckLibraryExists.cmake",
+		"/usr/share/cmake-3.28/Modules/CheckIncludeFile.cmake",
+		"/usr/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake",
+		"/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake",
+		"/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake",
+		"/usr/share/cmake-3.28/Modules/FindOpenSSL.cmake",
+		"/usr/share/cmake-3.28/Modules/FindPkgConfig.cmake",
+		"/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake",
+		"/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake",
+		"/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake",
+		"/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake",
+		"/usr/share/cmake-3.28/Modules/CMakePackageConfigHelpers.cmake",
+		"/usr/share/cmake-3.28/Modules/WriteBasicConfigVersionFile.cmake",
+		"/usr/share/cmake-3.28/Modules/BasicConfigVersion-AnyNewerVersion.cmake.in",
+		"/home/hunter/proj/ta/build/_deps/socketio-src/sioclientConfig.cmake.in"
+	],
+	"CMAKE_SOURCE_DIR" : "/home/hunter/proj/ta",
+	"DEP_FILE" : "/home/hunter/proj/ta/build/_deps/socketio-build/sioclient_autogen/deps",
+	"DEP_FILE_RULE_NAME" : "sioclient_autogen/timestamp",
+	"HEADERS" : 
+	[
+		[
+			"/home/hunter/proj/ta/build/_deps/socketio-src/src/internal/sio_client_impl.h",
+			"MU",
+			"TLJAIHGYSZ/moc_sio_client_impl.cpp",
+			null
+		],
+		[
+			"/home/hunter/proj/ta/build/_deps/socketio-src/src/internal/sio_packet.h",
+			"MU",
+			"TLJAIHGYSZ/moc_sio_packet.cpp",
+			null
+		],
+		[
+			"/home/hunter/proj/ta/build/_deps/socketio-src/src/sio_client.h",
+			"MU",
+			"UVLADIE3JM/moc_sio_client.cpp",
+			null
+		],
+		[
+			"/home/hunter/proj/ta/build/_deps/socketio-src/src/sio_socket.h",
+			"MU",
+			"UVLADIE3JM/moc_sio_socket.cpp",
+			null
+		]
+	],
+	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
+	"INCLUDE_DIR" : "/home/hunter/proj/ta/build/_deps/socketio-build/sioclient_autogen/include",
+	"MOC_COMPILATION_FILE" : "/home/hunter/proj/ta/build/_deps/socketio-build/sioclient_autogen/mocs_compilation.cpp",
+	"MOC_DEFINITIONS" : 
+	[
+		"ASIO_STANDALONE",
+		"BOOST_DATE_TIME_NO_LIB",
+		"BOOST_REGEX_NO_LIB",
+		"QT_NO_EMIT",
+		"_WEBSOCKETPP_CPP11_CHRONO_",
+		"_WEBSOCKETPP_CPP11_FUNCTIONAL_",
+		"_WEBSOCKETPP_CPP11_STL_",
+		"_WEBSOCKETPP_CPP11_TYPE_TRAITS_"
+	],
+	"MOC_DEPEND_FILTERS" : 
+	[
+		[
+			"Q_PLUGIN_METADATA",
+			"[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\([^\\)]*FILE[ \t]*\"([^\"]+)\""
+		]
+	],
+	"MOC_INCLUDES" : 
+	[
+		"/home/hunter/proj/ta/build/_deps/socketio-src/src",
+		"/home/hunter/proj/ta/build/_deps/socketio-src/lib/websocketpp",
+		"/home/hunter/proj/ta/build/_deps/socketio-src/lib/rapidjson/include",
+		"/home/hunter/proj/ta/build/_deps/socketio-src/lib/asio/asio/include",
+		"/usr/include/c++/13",
+		"/usr/include/x86_64-linux-gnu/c++/13",
+		"/usr/include/c++/13/backward",
+		"/usr/lib/gcc/x86_64-linux-gnu/13/include",
+		"/usr/local/include",
+		"/usr/include/x86_64-linux-gnu",
+		"/usr/include"
+	],
+	"MOC_MACRO_NAMES" : 
+	[
+		"Q_OBJECT",
+		"Q_GADGET",
+		"Q_GADGET_EXPORT",
+		"Q_NAMESPACE",
+		"Q_NAMESPACE_EXPORT"
+	],
+	"MOC_OPTIONS" : [],
+	"MOC_PATH_PREFIX" : false,
+	"MOC_PREDEFS_CMD" : 
+	[
+		"/usr/bin/c++",
+		"-std=gnu++17",
+		"-dM",
+		"-E",
+		"-c",
+		"/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp"
+	],
+	"MOC_PREDEFS_FILE" : "/home/hunter/proj/ta/build/_deps/socketio-build/sioclient_autogen/moc_predefs.h",
+	"MOC_RELAXED_MODE" : false,
+	"MOC_SKIP" : [],
+	"MULTI_CONFIG" : false,
+	"PARALLEL" : 8,
+	"PARSE_CACHE_FILE" : "/home/hunter/proj/ta/build/_deps/socketio-build/CMakeFiles/sioclient_autogen.dir/ParseCache.txt",
+	"QT_MOC_EXECUTABLE" : "/usr/lib/qt6/libexec/moc",
+	"QT_UIC_EXECUTABLE" : "/usr/lib/qt6/libexec/uic",
+	"QT_VERSION_MAJOR" : 6,
+	"QT_VERSION_MINOR" : 4,
+	"SETTINGS_FILE" : "/home/hunter/proj/ta/build/_deps/socketio-build/CMakeFiles/sioclient_autogen.dir/AutogenUsed.txt",
+	"SOURCES" : 
+	[
+		[
+			"/home/hunter/proj/ta/build/_deps/socketio-src/src/internal/sio_client_impl.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/hunter/proj/ta/build/_deps/socketio-src/src/internal/sio_packet.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/hunter/proj/ta/build/_deps/socketio-src/src/sio_client.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/hunter/proj/ta/build/_deps/socketio-src/src/sio_socket.cpp",
+			"MU",
+			null
+		]
+	],
+	"UIC_OPTIONS" : [],
+	"UIC_SEARCH_PATHS" : [],
+	"UIC_SKIP" : [],
+	"UIC_UI_FILES" : [],
+	"VERBOSITY" : 0
+}

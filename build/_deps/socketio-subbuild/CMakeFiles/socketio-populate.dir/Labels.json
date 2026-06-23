@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/CMakeFiles/socketio-populate"
+		},
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/CMakeFiles/socketio-populate.rule"
+		},
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/CMakeFiles/socketio-populate-complete.rule"
+		},
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/socketio-populate-prefix/src/socketio-populate-stamp/socketio-populate-build.rule"
+		},
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/socketio-populate-prefix/src/socketio-populate-stamp/socketio-populate-configure.rule"
+		},
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/socketio-populate-prefix/src/socketio-populate-stamp/socketio-populate-download.rule"
+		},
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/socketio-populate-prefix/src/socketio-populate-stamp/socketio-populate-install.rule"
+		},
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/socketio-populate-prefix/src/socketio-populate-stamp/socketio-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/socketio-populate-prefix/src/socketio-populate-stamp/socketio-populate-patch.rule"
+		},
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/socketio-populate-prefix/src/socketio-populate-stamp/socketio-populate-test.rule"
+		},
+		{
+			"file" : "/home/hunter/proj/ta/build/_deps/socketio-subbuild/socketio-populate-prefix/src/socketio-populate-stamp/socketio-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"socketio-populate"
+		],
+		"name" : "socketio-populate"
+	}
+}
