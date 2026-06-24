@@ -7,14 +7,10 @@
 #include "adblocker.cpp"
 #include "qt_incs.hpp"
 
-#include <qnamespace.h>
 #include <thread>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <qlineedit.h>
-#include <qobject.h>
-#include <qpushbutton.h>
 #include <sodium/crypto_secretbox.h>
 #include <string>
 
@@ -41,7 +37,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     //Global font
     int id = QFontDatabase::addApplicationFont("config/fonts/impress-bt.ttf");
-    QString loadedFont = QFontDatabase::applicationFontFamilies(id).at(0);
+    QString loadedFont;
+    if(id != -1 && !QFontDatabase::applicationFontFamilies(id).isEmpty())
+        loadedFont = QFontDatabase::applicationFontFamilies(id).at(0);
+    else
+        loadedFont = "Arial"; //fallback if font file is missing from deployment
     m_ttrFontSmall = QFont(loadedFont, 12);
     m_ttrFont = QFont(loadedFont, 16);
     m_ttrFontLarge = QFont(loadedFont, 18);
@@ -90,22 +90,33 @@ MainWindow::MainWindow(QWidget* parent)
     ui->username_input->setFocus();
 
     // line edit default text, load username and password from bin if stored
-    if(enc::readState_fromFile())
+    try
     {
-        ui->storeLoginCheckbox->toggle();
-        m_dontStoreCreds = true;
+        if(enc::readState_fromFile())
+        {
+            ui->storeLoginCheckbox->toggle();
+            m_dontStoreCreds = true;
+            ui->username_input->setPlaceholderText("Enter your username...");
+            ui->password_input->setPlaceholderText("Enter your password...");
+        }
+        else
+        {
+            enc::ToonHQLogin fetchedCreds;
+            fetchedCreds = enc::fetch_creds(m_loginsPath.keyPath, m_loginsPath.credPath);
+            if(!fetchedCreds.username.empty() && !fetchedCreds.password.empty())
+            {
+                ui->username_input->setText(QString::fromStdString(fetchedCreds.username));
+                ui->password_input->setText(QString::fromStdString(fetchedCreds.password));
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        //Credential file is corrupt or key mismatch - reset gracefully instead of aborting
         ui->username_input->setPlaceholderText("Enter your username...");
         ui->password_input->setPlaceholderText("Enter your password...");
-    }
-    else
-    {
-        enc::ToonHQLogin fetchedCreds;
-        fetchedCreds = enc::fetch_creds(m_loginsPath.keyPath, m_loginsPath.credPath);
-        if(!fetchedCreds.username.empty() && !fetchedCreds.password.empty())
-        {
-            ui->username_input->setText(QString::fromStdString(fetchedCreds.username));
-            ui->password_input->setText(QString::fromStdString(fetchedCreds.password));
-        }
+        ui->statusLabel->setStyleSheet("color: red;");
+        ui->statusLabel->setText(QString("Credential load error: ") + e.what());
     }
 
     //Button connects
@@ -976,7 +987,8 @@ void MainWindow::state_freshLoad(uint8_t which_one)
             break;
         }
         default:
-            throw std::runtime_error("Unknown case in state_freshLoad");
+            QMessageBox::critical(this, "Internal Error", QString("Unknown index %1 in state_freshLoad").arg(which_one));
+            return;
     }
 }
 
@@ -1113,7 +1125,8 @@ void MainWindow::state_registeredLoad(uint8_t how_many)
             break;
         }
         default:
-            throw std::runtime_error("Unknown case in state_registered_load");
+            QMessageBox::critical(this, "Internal Error", QString("Unknown index %1 in state_registeredLoad").arg(how_many));
+            return;
     }
 }
 
@@ -1170,7 +1183,8 @@ void MainWindow::state_addClientPressed(uint8_t which_button)
             break;
         }
         default:
-            throw std::runtime_error("Unknown case in state_addClientPressed");
+            QMessageBox::critical(this, "Internal Error", QString("Unknown index %1 in state_addClientPressed").arg(which_button));
+            return;
     }
 }
 
@@ -1391,14 +1405,18 @@ void MainWindow::state_saveButtonPressed(uint8_t which_button)
             break;
         }
         default:
-            throw std::runtime_error("Unknown button number in state_saveButtonPressed()");
+            QMessageBox::critical(this, "Internal Error", QString("Unknown index %1 in state_saveButtonPressed").arg(which_button));
+            return;
     }
 }
 
 void MainWindow::state_removeButtonPressed(uint8_t which_button)
 {
     if(which_button < 1 || which_button > 3)
-        throw std::runtime_error("Unknown case in state_removeButtonPressed");
+    {
+        QMessageBox::critical(this, "Internal Error", QString("Unknown index %1 in state_removeButtonPressed").arg(which_button));
+        return;
+    }
 
     unsigned char key[crypto_secretbox_KEYBYTES];
     enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
@@ -1467,7 +1485,8 @@ void MainWindow::state_editButtonPressed(uint8_t which_button)
             break;
         }
         default:
-            throw std::runtime_error("Unknown state in state_editButtonPressed");
+            QMessageBox::critical(this, "Internal Error", QString("Unknown index %1 in state_editButtonPressed").arg(which_button));
+            return;
     }
 }
 
@@ -1675,7 +1694,8 @@ void MainWindow::state_saveNoIncButtonPressed(uint8_t which_button)
             break;
         }
         default:
-            throw std::runtime_error("Unknown button number in state_saveButtonPressed()");
+            QMessageBox::critical(this, "Internal Error", QString("Unknown index %1 in state_saveNoIncButtonPressed").arg(which_button));
+            return;
     }
 }
 
@@ -1705,7 +1725,8 @@ void MainWindow::display_file_location(uint8_t which_one)
             break;
         }
         default:
-            throw std::runtime_error("Unknown case in display_file_location");
+            QMessageBox::critical(this, "Internal Error", QString("Unknown index %1 in display_file_location").arg(which_one));
+            return;
     }
 }
 
@@ -1735,7 +1756,8 @@ void MainWindow::hide_file_location(uint8_t which_one)
             break;
         }
         default:
-            throw std::runtime_error("Unknown case in display_file_location");
+            QMessageBox::critical(this, "Internal Error", QString("Unknown index %1 in hide_file_location").arg(which_one));
+            return;
     }
 }
 
@@ -1843,178 +1865,188 @@ void MainWindow::setNoFocusItems()
 
 void MainWindow::state_launchButton(uint8_t which_button)
 {
-    switch(which_button)
+    try
     {
-        case 1:
+        switch(which_button)
         {
-            std::vector<enc::ToontownLogins> tmp_login_vec = enc::fetch_toontownCreds(m_toontownLoginsPath.keyPath, 
-                    m_toontownLoginsPath.credPath, m_numCreds);
-
-            ttr::ToontownLoginInformation result = ttr::toonLauncher_retrieveResponse(tmp_login_vec[0].username, tmp_login_vec[0].password);
-
-            if(!result.error_info.errorMsg.empty())
+            case 1:
             {
-                ui->status_label_1->setText(QString::fromStdString(result.error_info.errorMsg));
-                ui->status_label_1->show();
-                return;
-            }
+                std::vector<enc::ToontownLogins> tmp_login_vec = enc::fetch_toontownCreds(m_toontownLoginsPath.keyPath, 
+                        m_toontownLoginsPath.credPath, m_numCreds);
 
-            std::string engine_loc;
+                ttr::ToontownLoginInformation result = ttr::toonLauncher_retrieveResponse(tmp_login_vec[0].username, tmp_login_vec[0].password);
 
-            if(ui->fileLocation_input1->text().isEmpty())
-            {
-                std::optional<std::filesystem::path> enginePath = fd::findTTREngineAuto();
-                if(!enginePath)
+                if(!result.error_info.errorMsg.empty())
                 {
-                    ui->status_label_1->setText("Couldn't auto detect install - enter manually");
+                    ui->status_label_1->setText(QString::fromStdString(result.error_info.errorMsg));
                     ui->status_label_1->show();
                     return;
-                }   
-                engine_loc = enginePath->string();
-                ui->fileLocation_input1->setText(QString::fromStdString(engine_loc));
+                }
 
-                //persist new found path into this record, in place
-                unsigned char key[crypto_secretbox_KEYBYTES];
-                enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
-                enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath, m_numCreds, 1, key, engine_loc);
-            }
-            else
-            {
-                engine_loc = ui->fileLocation_input1->text().toStdString();
-                // persist whatever the user typed, even if invalid, user can fix it later
-                unsigned char key[crypto_secretbox_KEYBYTES];
-                enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
-                enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath,m_numCreds, 1, key, engine_loc);
-            }
+                std::string engine_loc;
 
-            if(!fd::looksLikeTTREngine(engine_loc))
-            {
-                ui->status_label_1->setText("Saved install path looks invalid");
-                ui->status_label_1->show();
-                return;
-            }
-            if(!ttr::launch_toontown(engine_loc, result.gameServer, result.playCookie))
-            {
-                ui->status_label_1->setText("Failed to boot Toontown with provided info");
-                ui->status_label_1->show();
-            }
-
-            break;
-        }
-        case 2:
-        {
-            std::vector<enc::ToontownLogins> tmp_login_vec = enc::fetch_toontownCreds(m_toontownLoginsPath.keyPath, 
-                    m_toontownLoginsPath.credPath, m_numCreds);
-
-            ttr::ToontownLoginInformation result = ttr::toonLauncher_retrieveResponse(tmp_login_vec[1].username, tmp_login_vec[1].password);
-
-            if(!result.error_info.errorMsg.empty())
-            {
-                ui->status_label_2->setText(QString::fromStdString(result.error_info.errorMsg));
-                ui->status_label_2->show();
-                return;
-            }
-
-            std::string engine_loc;
-
-            if(ui->fileLocation_input2->text().isEmpty())
-            {
-                std::optional<std::filesystem::path> enginePath = fd::findTTREngineAuto();
-                if(!enginePath)
+                if(ui->fileLocation_input1->text().isEmpty())
                 {
-                    ui->status_label_2->setText("Couldn't auto detect install - enter manually");
+                    std::optional<std::filesystem::path> enginePath = fd::findTTREngineAuto();
+                    if(!enginePath)
+                    {
+                        ui->status_label_1->setText("Couldn't auto detect install - enter manually");
+                        ui->status_label_1->show();
+                        return;
+                    }   
+                    engine_loc = enginePath->string();
+                    ui->fileLocation_input1->setText(QString::fromStdString(engine_loc));
+
+                    //persist new found path into this record, in place
+                    unsigned char key[crypto_secretbox_KEYBYTES];
+                    enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
+                    enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath, m_numCreds, 1, key, engine_loc);
+                }
+                else
+                {
+                    engine_loc = ui->fileLocation_input1->text().toStdString();
+                    // persist whatever the user typed, even if invalid, user can fix it later
+                    unsigned char key[crypto_secretbox_KEYBYTES];
+                    enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
+                    enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath,m_numCreds, 1, key, engine_loc);
+                }
+
+                if(!fd::looksLikeTTREngine(engine_loc))
+                {
+                    ui->status_label_1->setText("Saved install path looks invalid");
+                    ui->status_label_1->show();
+                    return;
+                }
+                if(!ttr::launch_toontown(engine_loc, result.gameServer, result.playCookie))
+                {
+                    ui->status_label_1->setText("Failed to boot Toontown with provided info");
+                    ui->status_label_1->show();
+                }
+
+                break;
+            }
+            case 2:
+            {
+                std::vector<enc::ToontownLogins> tmp_login_vec = enc::fetch_toontownCreds(m_toontownLoginsPath.keyPath, 
+                        m_toontownLoginsPath.credPath, m_numCreds);
+
+                ttr::ToontownLoginInformation result = ttr::toonLauncher_retrieveResponse(tmp_login_vec[1].username, tmp_login_vec[1].password);
+
+                if(!result.error_info.errorMsg.empty())
+                {
+                    ui->status_label_2->setText(QString::fromStdString(result.error_info.errorMsg));
                     ui->status_label_2->show();
                     return;
-                }   
-                engine_loc = enginePath->string();
-                ui->fileLocation_input2->setText(QString::fromStdString(engine_loc));
+                }
 
-                //persist new found path into this record, in place
-                unsigned char key[crypto_secretbox_KEYBYTES];
-                enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
-                enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath, m_numCreds, 2, key, engine_loc);
-            }
-            else
-            {
-                engine_loc = ui->fileLocation_input2->text().toStdString();
-                // persist whatever the user typed, even if invalid, user can fix it later
-                unsigned char key[crypto_secretbox_KEYBYTES];
-                enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
-                enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath,m_numCreds, 1, key, engine_loc);
-            }
+                std::string engine_loc;
 
-            if(!fd::looksLikeTTREngine(engine_loc))
-            {
-                ui->status_label_2->setText("Saved install path looks invalid");
-                ui->status_label_2->show();
-                return;
-            }
-            if(!ttr::launch_toontown(engine_loc, result.gameServer, result.playCookie))
-            {
-                ui->status_label_2->setText("Failed to boot Toontown with provided info");
-                ui->status_label_2->show();
-            }
-
-            break;
-        }
-        case 3:
-        {
-            std::vector<enc::ToontownLogins> tmp_login_vec = enc::fetch_toontownCreds(m_toontownLoginsPath.keyPath, 
-                    m_toontownLoginsPath.credPath, m_numCreds);
-
-            ttr::ToontownLoginInformation result = ttr::toonLauncher_retrieveResponse(tmp_login_vec[2].username, tmp_login_vec[2].password);
-
-            if(!result.error_info.errorMsg.empty())
-            {
-                ui->status_label_3->setText(QString::fromStdString(result.error_info.errorMsg));
-                ui->status_label_3->show();
-                return;
-            }
-
-            std::string engine_loc;
-
-            if(ui->fileLocation_input3->text().isEmpty())
-            {
-                std::optional<std::filesystem::path> enginePath = fd::findTTREngineAuto();
-                if(!enginePath)
+                if(ui->fileLocation_input2->text().isEmpty())
                 {
-                    ui->status_label_3->setText("Couldn't auto detect install - enter manually");
+                    std::optional<std::filesystem::path> enginePath = fd::findTTREngineAuto();
+                    if(!enginePath)
+                    {
+                        ui->status_label_2->setText("Couldn't auto detect install - enter manually");
+                        ui->status_label_2->show();
+                        return;
+                    }   
+                    engine_loc = enginePath->string();
+                    ui->fileLocation_input2->setText(QString::fromStdString(engine_loc));
+
+                    //persist new found path into this record, in place
+                    unsigned char key[crypto_secretbox_KEYBYTES];
+                    enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
+                    enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath, m_numCreds, 2, key, engine_loc);
+                }
+                else
+                {
+                    engine_loc = ui->fileLocation_input2->text().toStdString();
+                    // persist whatever the user typed, even if invalid, user can fix it later
+                    unsigned char key[crypto_secretbox_KEYBYTES];
+                    enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
+                    enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath,m_numCreds, 1, key, engine_loc);
+                }
+
+                if(!fd::looksLikeTTREngine(engine_loc))
+                {
+                    ui->status_label_2->setText("Saved install path looks invalid");
+                    ui->status_label_2->show();
+                    return;
+                }
+                if(!ttr::launch_toontown(engine_loc, result.gameServer, result.playCookie))
+                {
+                    ui->status_label_2->setText("Failed to boot Toontown with provided info");
+                    ui->status_label_2->show();
+                }
+
+                break;
+            }
+            case 3:
+            {
+                std::vector<enc::ToontownLogins> tmp_login_vec = enc::fetch_toontownCreds(m_toontownLoginsPath.keyPath, 
+                        m_toontownLoginsPath.credPath, m_numCreds);
+
+                ttr::ToontownLoginInformation result = ttr::toonLauncher_retrieveResponse(tmp_login_vec[2].username, tmp_login_vec[2].password);
+
+                if(!result.error_info.errorMsg.empty())
+                {
+                    ui->status_label_3->setText(QString::fromStdString(result.error_info.errorMsg));
                     ui->status_label_3->show();
                     return;
-                }   
-                engine_loc = enginePath->string();
-                ui->fileLocation_input3->setText(QString::fromStdString(engine_loc));
+                }
 
-                //persist new found path into this record, in place
-                unsigned char key[crypto_secretbox_KEYBYTES];
-                enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
-                enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath, m_numCreds, 3, key, engine_loc);
-            }
-            else
-            {
-                engine_loc = ui->fileLocation_input3->text().toStdString();
-                // persist whatever the user typed, even if invalid, user can fix it later
-                unsigned char key[crypto_secretbox_KEYBYTES];
-                enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
-                enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath,m_numCreds, 1, key, engine_loc);
-            }
+                std::string engine_loc;
 
-            if(!fd::looksLikeTTREngine(engine_loc))
-            {
-                ui->status_label_3->setText("Saved install path looks invalid");
-                ui->status_label_3->show();
-                return;
-            }
-            if(!ttr::launch_toontown(engine_loc, result.gameServer, result.playCookie))
-            {
-                ui->status_label_3->setText("Failed to boot Toontown with provided info");
-                ui->status_label_3->show();
-            }
+                if(ui->fileLocation_input3->text().isEmpty())
+                {
+                    std::optional<std::filesystem::path> enginePath = fd::findTTREngineAuto();
+                    if(!enginePath)
+                    {
+                        ui->status_label_3->setText("Couldn't auto detect install - enter manually");
+                        ui->status_label_3->show();
+                        return;
+                    }   
+                    engine_loc = enginePath->string();
+                    ui->fileLocation_input3->setText(QString::fromStdString(engine_loc));
 
-            break;
+                    //persist new found path into this record, in place
+                    unsigned char key[crypto_secretbox_KEYBYTES];
+                    enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
+                    enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath, m_numCreds, 3, key, engine_loc);
+                }
+                else
+                {
+                    engine_loc = ui->fileLocation_input3->text().toStdString();
+                    // persist whatever the user typed, even if invalid, user can fix it later
+                    unsigned char key[crypto_secretbox_KEYBYTES];
+                    enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
+                    enc::update_installPath(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath,m_numCreds, 1, key, engine_loc);
+                }
+
+                if(!fd::looksLikeTTREngine(engine_loc))
+                {
+                    ui->status_label_3->setText("Saved install path looks invalid");
+                    ui->status_label_3->show();
+                    return;
+                }
+                if(!ttr::launch_toontown(engine_loc, result.gameServer, result.playCookie))
+                {
+                    ui->status_label_3->setText("Failed to boot Toontown with provided info");
+                    ui->status_label_3->show();
+                }
+
+                break;
+            }
+            default:
+                //should never happen
+            QMessageBox::critical(this, "Internal Error", 
+                    QString("Unknown button index %1 in state_launchButton").arg(which_button));
+            return;
         }
-        default:
-            throw std::runtime_error("Unknown case in state_launchButton");
+    }
+    catch(const std::exception& e)
+    {
+        QMessageBox::critical(this, "Launch Error", QString("An error occurred while launching:\n\n") + e.what());
     }
 }
 

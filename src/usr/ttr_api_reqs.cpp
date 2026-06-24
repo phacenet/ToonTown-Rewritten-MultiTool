@@ -6,7 +6,6 @@
 #include <iostream>
 #include <cstring>
 #include <optional>
-#include <cassert>
 #include <filesystem>
 #include <QProcess>
 #include <string>
@@ -202,7 +201,11 @@ namespace ttr
 	 * */
 	std::vector<ttr::ToonHQToonInformation> extract_tooninfo(std::string bodyBuffer)
 	{
-		auto check_pos = [](std::string::size_type pos) {assert(pos != std::string::npos && "Failure in check_pos\n");};
+		auto check_pos = [](std::string::size_type pos, const char* ctx = "") 
+		{
+			if(pos == std::string::npos)
+				throw std::runtime_error(std::string("Parse failure in extract_tooninfo") + ctx);
+		};
 		
 		auto toons_pos = bodyBuffer.find("\"toons\":[{");
 		check_pos(toons_pos);

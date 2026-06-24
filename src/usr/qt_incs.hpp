@@ -28,3 +28,8 @@
 #include <QWebEngineProfile>
 #include <QStandardPaths>
 #include <qssl.h>
+#include <qlineedit.h>
+#include <qnamespace.h>
+#include <qobject.h>
+#include <qpushbutton.h>
+#include <QMessageBox>
