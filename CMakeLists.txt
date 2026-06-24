@@ -122,6 +122,7 @@ if(UNIX)
 elseif(WIN32)
 	target_sources(${PROJECT_NAME} PRIVATE src/usr/direct_inputs_win32.cpp)
 	target_link_libraries(${PROJECT_NAME} PRIVATE user32)
+	target_sources(${PROJECT_NAME} PRIVATE app.rc) #exe icon
 endif()
 
 # include paths

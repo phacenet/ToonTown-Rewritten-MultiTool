@@ -44,9 +44,8 @@ static LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
         PostQuitMessage(0);
         return 1; // eat the click
     }
-    // Re-apply crosshair on every move so target windows can't reset it via WM_SETCURSOR
-    if(nCode >= 0 && wParam == WM_MOUSEMOVE)
-        SetCursor(LoadCursor(nullptr, IDC_CROSS));
+    // No cursor handling needed here — SetSystemCursor in get_window_via_click
+    // replaces the system arrow globally so no window can override it.
     return CallNextHookEx(g_mouseHook, nCode, wParam, lParam);
 }
 
@@ -56,14 +55,23 @@ namespace dir_inp
     {
         Sleep(300); // same delay as the X11 version
 
-        // Show a crosshair so the user knows to click a target window
-        HCURSOR oldCursor = SetCursor(LoadCursor(nullptr, IDC_CROSS));
+        // SetCursor() only affects the cursor while the mouse is over a window
+        // owned by this thread, so it stops working the moment the user moves
+        // over any other process (e.g. the TTR game window).
+        //
+        // SetSystemCursor() replaces the cursor slot in the global system table,
+        // making the crosshair appear everywhere until we restore it.
+        // CopyCursor() is required — SetSystemCursor takes ownership of the
+        // handle so it must not be a shared system cursor.
+        HCURSOR cross = CopyCursor(LoadCursor(nullptr, IDC_CROSS));
+        SetSystemCursor(cross, OCR_NORMAL); // replaces the arrow slot globally
+        // (cross handle is now owned by the system — do not DestroyCursor it)
 
         g_clickedWindow = nullptr;
         g_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, mouseProc, nullptr, 0);
         if(!g_mouseHook)
         {
-            SetCursor(oldCursor);
+            SystemParametersInfo(SPI_SETCURSORS, 0, nullptr, 0); // restore
             return 0;
         }
 
@@ -76,7 +84,9 @@ namespace dir_inp
 
         UnhookWindowsHookEx(g_mouseHook);
         g_mouseHook = nullptr;
-        SetCursor(oldCursor); // restore whatever was set before
+
+        // Reload all system cursors from the registry, undoing SetSystemCursor
+        SystemParametersInfo(SPI_SETCURSORS, 0, nullptr, 0);
 
         return reinterpret_cast<long>(g_clickedWindow);
     }

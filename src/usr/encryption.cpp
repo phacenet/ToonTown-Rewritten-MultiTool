@@ -119,13 +119,16 @@ namespace enc
 		return parsed_creds;
 	}
 
-
+//need to fix this on win32 vers, checking dont store logins box just causes the failed to create state.bin
 	void storeState_toFile(const std::string& filepath)
 	{
 		if(std::filesystem::exists(filepath)) return;
 		else
 		{
+			std::filesystem::path fl_path = filepath;
+			std::filesystem::create_directories(fl_path.parent_path()); //does nothing if they already exist
 			std::ofstream state(filepath);
+			
 			if(!state.is_open())
 				throw std::runtime_error("Failed to create state.bin");
 			state.close();
