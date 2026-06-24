@@ -1,10 +1,5 @@
 #include "ttr_api_reqs.hpp"
 
-#ifdef _WIN32
-#   define WIN32_LEAN_AND_MEAN
-#   include <Windows.h>
-#endif
-
 #include <algorithm>
 #include <curl/curl.h>
 #include <stdexcept>
@@ -430,7 +425,28 @@ namespace ttr
 					client->socket(nsp)->on("boarding_created", [=](sio::event& ev)
 							{
 								std::cout << "[EVENT] boarding_created received\n";
-								auto data = ev.get_message()->get_map();
+
+								// socket.io-client-cpp behaviour differs by platform/build: on some
+								// builds (notably MSVC debug) the payload arrives as array[0] rather
+								// than a bare object, causing get_map() to hit its base-class assert.
+								// Check the flag and unwrap one array level when needed.
+								sio::message::ptr msg = ev.get_message();
+
+								if(msg && msg->get_flag() == sio::message::flag_array)
+								{
+									auto& vec = msg->get_vector();
+									if(!vec.empty() && vec[0])
+										msg = vec[0];
+								}
+
+								if(!msg || msg->get_flag() != sio::message::flag_object)
+								{
+									std::cerr << "[boarding_created] unexpected message flag: "
+									          << (msg ? static_cast<int>(msg->get_flag()) : -1) << "\n";
+									return;
+								}
+
+								auto data = msg->get_map();
 								int type = (int)data["type"]->get_int();
 								int district = (int)data["district"]->get_int();
 								int location = (int)data["location"]->get_int();
@@ -597,66 +613,19 @@ namespace ttr
 
 	bool launch_toontown(const std::string& enginePath, const std::string& gameserver, const std::string& cookie)
 	{
-#ifdef _WIN32
-		// QProcess::startDetached on Windows still places the child in the parent's
-		// Job Object. When the launcher closes the Job Object closes with it, and
-		// Windows kills every process in the job — including TTREngine.
-		// CreateProcess with CREATE_BREAKAWAY_FROM_JOB fully severs that link so
-		// the game keeps running after the launcher exits.
+		 QProcess proc;
+		 proc.setProgram(QString::fromStdString(enginePath));
+		 proc.setWorkingDirectory(QString::fromStdString(
+			  std::filesystem::path(enginePath).parent_path().string()));
 
-		// Set env vars on this process; CreateProcess copies the environment to the
-		// child at call time, so we can safely unset them right after.
-		SetEnvironmentVariableA("TTR_GAMESERVER", gameserver.c_str());
-		SetEnvironmentVariableA("TTR_PLAYCOOKIE",  cookie.c_str());
+		 QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+		 env.insert("TTR_GAMESERVER", QString::fromStdString(gameserver));
+		 env.insert("TTR_PLAYCOOKIE", QString::fromStdString(cookie));
+		 proc.setProcessEnvironment(env);
+		 proc.setStandardOutputFile(QProcess::nullDevice());
+		 proc.setStandardErrorFile(QProcess::nullDevice());
 
-		std::filesystem::path fsPath(enginePath);
-		std::wstring wPath = fsPath.wstring();
-		std::wstring wDir  = fsPath.parent_path().wstring();
-
-		STARTUPINFOW si{};
-		si.cb = sizeof(si);
-		PROCESS_INFORMATION pi{};
-
-		BOOL ok = CreateProcessW(
-			wPath.c_str(),  // executable
-			nullptr,        // command line
-			nullptr,        // process security attrs
-			nullptr,        // thread security attrs
-			FALSE,          // do not inherit handles
-			CREATE_BREAKAWAY_FROM_JOB | DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
-			nullptr,        // inherit environment (child gets copy with our vars)
-			wDir.c_str(),   // working directory
-			&si,
-			&pi
-		);
-
-		// Unset from parent — child already has its own copy
-		SetEnvironmentVariableA("TTR_GAMESERVER", nullptr);
-		SetEnvironmentVariableA("TTR_PLAYCOOKIE",  nullptr);
-
-		if(ok)
-		{
-			CloseHandle(pi.hProcess);
-			CloseHandle(pi.hThread);
-			return true;
-		}
-		return false;
-#else
-		// Linux: startDetached correctly detaches from the parent, no job objects
-		QProcess proc;
-		proc.setProgram(QString::fromStdString(enginePath));
-		proc.setWorkingDirectory(QString::fromStdString(
-			std::filesystem::path(enginePath).parent_path().string()));
-
-		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-		env.insert("TTR_GAMESERVER", QString::fromStdString(gameserver));
-		env.insert("TTR_PLAYCOOKIE",  QString::fromStdString(cookie));
-		proc.setProcessEnvironment(env);
-		proc.setStandardOutputFile(QProcess::nullDevice());
-		proc.setStandardErrorFile(QProcess::nullDevice());
-
-		return proc.startDetached();
-#endif
+		 return proc.startDetached();
 	}
 
 	int estimateSecondsRemaining(const InvasionInformation& inv_info)
