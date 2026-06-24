@@ -6,6 +6,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # stop namespace collision for Qt's emit and libsodium's internal emit
 add_compile_definitions(QT_NO_EMIT)
 
+# Output exe name — separate from the CMake target name so hyphens are safe
+set(EXE_NAME "TTR-MultiTool")
+
 #QT
 if(WIN32)
 	set(CMAKE_PREFIX_PATH "C:/Qt/6.11.1/msvc2022_64" ${CMAKE_PREFIX_PATH})
@@ -79,6 +82,9 @@ qt_add_executable(${PROJECT_NAME}
 	src/usr/adblocker.cpp
 )
 
+# Rename the output binary from "proj" to EXE_NAME
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${EXE_NAME}")
+
 # Copy config/ next to the exe after every build (fonts, icons, etc.)
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -137,17 +143,18 @@ if(WIN32)
 		REQUIRED
 	)
 
-	# Run windeployqt after every build so the output directory is always
-	# runnable without a separate install step.
+	# Only run windeployqt on Release builds — no point deploying Qt DLLs
+	# during debug iteration, and it adds noticeable build time.
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND "${WINDEPLOYQT}"
-			$<IF:$<CONFIG:Debug>,--debug,--release>
+		COMMAND "$<$<CONFIG:Release>:${WINDEPLOYQT}>"
+			--release
 			--no-translations        # saves ~20 MB
 			--no-system-d3d-compiler # saves ~5 MB, not needed at runtime
 			--no-opengl-sw           # saves ~15 MB; skip Mesa fallback
 			                         # (users running TTR already have a GPU)
 			"$<TARGET_FILE:${PROJECT_NAME}>"
 		COMMENT "Running windeployqt..."
+		VERBATIM
 	)
 endif()
 
@@ -167,7 +174,7 @@ if(WIN32)
 				--no-translations
 				--no-system-d3d-compiler
 				--no-opengl-sw
-				\"\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.exe\"
+				\"\${CMAKE_INSTALL_PREFIX}/${EXE_NAME}.exe\"
 		)
 	")
 endif()
