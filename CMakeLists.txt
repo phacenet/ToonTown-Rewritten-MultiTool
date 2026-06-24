@@ -5,6 +5,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+#force consistent MSVC runtime
+if(MSVC)
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 # stop namespace collision for Qt's emit and libsodium's internal emit
 add_compile_definitions(QT_NO_EMIT)
 
@@ -59,7 +64,13 @@ foreach(sio_target sioclient sioclient_tls)
 				OpenSSL::SSL
 				OpenSSL::Crypto
 			)
-	
+			
+			if(WIN32)
+				target_link_libraries(${sio_target} PRIVATE unofficial-sodium::sodium)
+			else()
+				target_link_libraries(${sio_target} PRIVATE ${SODIUM_LIBRARIES})
+			endif()
+
 			if(MSVC)
 				target_compile_options(${sio_target} PRIVATE /wd4996)
 			else()
@@ -80,7 +91,7 @@ qt_add_executable(${PROJECT_NAME}
 	src/usr/adblocker.cpp
 )
 
-#libcurl
+# link libs
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 	CURL::libcurl
 	Qt6::Widgets
@@ -91,7 +102,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 	OpenSSL::Crypto
 )
 
-#this is the part i dont know where goes
+# libsodium for main app
 if(UNIX)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${SODIUM_LIBRARIES})
     target_include_directories(${PROJECT_NAME} PRIVATE ${SODIUM_INCLUDE_DIRS})
