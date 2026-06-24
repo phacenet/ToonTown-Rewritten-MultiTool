@@ -135,12 +135,22 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # -------------------------------------------------------------------------
 if(WIN32)
 	# Locate windeployqt from the Qt prefix rather than hardcoding the path.
-	# This keeps things working if the Qt version is ever bumped.
 	find_program(WINDEPLOYQT
 		NAMES windeployqt windeployqt6
 		HINTS "C:/Qt/6.11.1/msvc2022_64/bin"
 		      "${Qt6_DIR}/../../../bin"
 		REQUIRED
+	)
+
+	# Copy non-Qt runtime DLLs (libcurl, OpenSSL, libsodium, etc.) next to
+	# the exe for every build type so the build directory is always runnable.
+	# TARGET_RUNTIME_DLLS walks all linked imported targets automatically.
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			$<TARGET_RUNTIME_DLLS:${PROJECT_NAME}>
+			$<TARGET_FILE_DIR:${PROJECT_NAME}>
+		COMMAND_EXPAND_LISTS
+		COMMENT "Copying runtime DLLs (curl, OpenSSL, sodium)..."
 	)
 
 	# Only run windeployqt on Release builds — no point deploying Qt DLLs
@@ -164,8 +174,14 @@ endif()
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/config" DESTINATION .)
 
-# Run windeployqt a second time against the install prefix so CPack gets
-# the Qt DLLs too. The post-build step above only covers the build tree.
+# Install non-Qt runtime DLLs (libcurl, OpenSSL, libsodium).
+# windeployqt handles Qt's own DLLs in the install(CODE) block below.
+if(WIN32)
+	install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> DESTINATION .)
+endif()
+
+# Run windeployqt against the install prefix so CPack gets the Qt DLLs too.
+# The post-build step above only covers the build tree.
 if(WIN32)
 	install(CODE "
 		execute_process(
