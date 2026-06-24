@@ -146,7 +146,6 @@ if(WIN32)
 			--no-system-d3d-compiler # saves ~5 MB, not needed at runtime
 			--no-opengl-sw           # saves ~15 MB; skip Mesa fallback
 			                         # (users running TTR already have a GPU)
-			--no-virtualkeyboard
 			"$<TARGET_FILE:${PROJECT_NAME}>"
 		COMMENT "Running windeployqt..."
 	)
@@ -168,7 +167,6 @@ if(WIN32)
 				--no-translations
 				--no-system-d3d-compiler
 				--no-opengl-sw
-				--no-virtualkeyboard
 				\"\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.exe\"
 		)
 	")
