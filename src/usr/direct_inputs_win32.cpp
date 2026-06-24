@@ -1,6 +1,7 @@
 // direct_inputs_win32.cpp
 #include "direct_inputs.hpp"
 
+#define OEMRESOURCE       // required for OCR_* cursor constants (SetSystemCursor)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <vector>
