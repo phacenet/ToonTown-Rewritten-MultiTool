@@ -1278,21 +1278,27 @@ void MainWindow::state_saveButtonPressed(uint8_t which_button)
                 return;
             }
 
-            // Fetch all stored entries, replace slot 0 in-place, re-encrypt.
-            // encrypt_to_file_append would append a duplicate instead of updating.
-            std::vector<enc::ToontownLogins> all_1 = enc::fetch_toontownCreds(
-                m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath, m_numCreds);
-            all_1[0].username    = username_1;
-            all_1[0].password    = pname_1;
-            all_1[0].alias       = alias_1;
-            all_1[0].launcherPath = ui->fileLocation_input1->text().toStdString();
-            std::string blob_1;
-            for(const auto& e : all_1)
-                blob_1 += e.username + '\n' + e.password + '\n' + e.alias + '\n' + e.launcherPath + '\n';
-            unsigned char key[crypto_secretbox_KEYBYTES];
-            enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
-            enc::encrypt_to_file(blob_1, m_toontownLoginsPath.credPath, key);
-            enc::store_numCreds(++m_numCreds);
+            //encrypt and append new credential entry
+            try
+            {
+                std::string user_data = username_1 + '\n' + pname_1 + '\n' + alias_1 + '\n' + ui->fileLocation_input1->text().toStdString() + '\n';
+                unsigned char key[crypto_secretbox_KEYBYTES];
+                enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
+                enc::encrypt_to_file_append(user_data, m_toontownLoginsPath.credPath, key);
+                enc::store_numCreds(++m_numCreds);
+            }
+            catch(const std::exception& e)
+            {
+                QMessageBox::critical(this, "Save Error", QString("Failed to save credentials:\n") + e.what());
+                ui->uname_label_1->show();
+                ui->unameInput1->show();
+                ui->pword_label_1->show();
+                ui->pwordInput1->show();
+                ui->alias_label_1->show();
+                ui->aliasInput1->show();
+                ui->save_btn1->show();
+                return;
+            }
 
             //show alias
             if(!alias_1.empty())
@@ -1357,20 +1363,27 @@ void MainWindow::state_saveButtonPressed(uint8_t which_button)
                 return;
             }
 
-            // Fetch all stored entries, replace slot 1 in-place, re-encrypt.
-            std::vector<enc::ToontownLogins> all_2 = enc::fetch_toontownCreds(
-                m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath, m_numCreds);
-            all_2[1].username    = username_2;
-            all_2[1].password    = pname_2;
-            all_2[1].alias       = alias_2;
-            all_2[1].launcherPath = ui->fileLocation_input2->text().toStdString();
-            std::string blob_2;
-            for(const auto& e : all_2)
-                blob_2 += e.username + '\n' + e.password + '\n' + e.alias + '\n' + e.launcherPath + '\n';
-            unsigned char key[crypto_secretbox_KEYBYTES];
-            enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
-            enc::encrypt_to_file(blob_2, m_toontownLoginsPath.credPath, key);
-            enc::store_numCreds(++m_numCreds);
+            //encrypt and append new credential entry
+            try
+            {
+                std::string user_data = username_2 + '\n' + pname_2 + '\n' + alias_2 + '\n' + ui->fileLocation_input2->text().toStdString() + '\n';
+                unsigned char key[crypto_secretbox_KEYBYTES];
+                enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
+                enc::encrypt_to_file_append(user_data, m_toontownLoginsPath.credPath, key);
+                enc::store_numCreds(++m_numCreds);
+            }
+            catch(const std::exception& e)
+            {
+                QMessageBox::critical(this, "Save Error", QString("Failed to save credentials:\n") + e.what());
+                ui->uname_label_2->show();
+                ui->unameInput2->show();
+                ui->pword_label_2->show();
+                ui->pwordInput2->show();
+                ui->alias_label_2->show();
+                ui->aliasInput2->show();
+                ui->save_btn2->show();
+                return;
+            }
 
             //show alias
             if(!alias_2.empty())
@@ -1436,20 +1449,27 @@ void MainWindow::state_saveButtonPressed(uint8_t which_button)
                 return;
             }
 
-            // Fetch all stored entries, replace slot 2 in-place, re-encrypt.
-            std::vector<enc::ToontownLogins> all_3 = enc::fetch_toontownCreds(
-                m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath, m_numCreds);
-            all_3[2].username    = username_3;
-            all_3[2].password    = pname_3;
-            all_3[2].alias       = alias_3;
-            all_3[2].launcherPath = ui->fileLocation_input3->text().toStdString();
-            std::string blob_3;
-            for(const auto& e : all_3)
-                blob_3 += e.username + '\n' + e.password + '\n' + e.alias + '\n' + e.launcherPath + '\n';
-            unsigned char key[crypto_secretbox_KEYBYTES];
-            enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
-            enc::encrypt_to_file(blob_3, m_toontownLoginsPath.credPath, key);
-            enc::store_numCreds(++m_numCreds);
+            //encrypt and append new credential entry
+            try
+            {
+                std::string user_data = username_3 + '\n' + pname_3 + '\n' + alias_3 + '\n' + ui->fileLocation_input3->text().toStdString() + '\n';
+                unsigned char key[crypto_secretbox_KEYBYTES];
+                enc::load_keyfile(m_toontownLoginsPath.keyPath, key);
+                enc::encrypt_to_file_append(user_data, m_toontownLoginsPath.credPath, key);
+                enc::store_numCreds(++m_numCreds);
+            }
+            catch(const std::exception& e)
+            {
+                QMessageBox::critical(this, "Save Error", QString("Failed to save credentials:\n") + e.what());
+                ui->uname_label_3->show();
+                ui->unameInput3->show();
+                ui->pword_label_3->show();
+                ui->pwordInput3->show();
+                ui->alias_label_3->show();
+                ui->aliasInput3->show();
+                ui->save_btn3->show();
+                return;
+            }
 
             //show alias
             if(!alias_3.empty())
