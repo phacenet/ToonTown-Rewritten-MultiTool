@@ -425,7 +425,28 @@ namespace ttr
 					client->socket(nsp)->on("boarding_created", [=](sio::event& ev)
 							{
 								std::cout << "[EVENT] boarding_created received\n";
-								auto data = ev.get_message()->get_map();
+
+								// socket.io-client-cpp behaviour differs by platform/build: on some
+								// builds (notably MSVC debug) the payload arrives as array[0] rather
+								// than a bare object, causing get_map() to hit its base-class assert.
+								// Check the flag and unwrap one array level when needed.
+								sio::message::ptr msg = ev.get_message();
+
+								if(msg && msg->get_flag() == sio::message::flag_array)
+								{
+									auto& vec = msg->get_vector();
+									if(!vec.empty() && vec[0])
+										msg = vec[0];
+								}
+
+								if(!msg || msg->get_flag() != sio::message::flag_object)
+								{
+									std::cerr << "[boarding_created] unexpected message flag: "
+									          << (msg ? static_cast<int>(msg->get_flag()) : -1) << "\n";
+									return;
+								}
+
+								auto data = msg->get_map();
 								int type = (int)data["type"]->get_int();
 								int district = (int)data["district"]->get_int();
 								int location = (int)data["location"]->get_int();
@@ -628,5 +649,3 @@ namespace ttr
 	}
 
 }
-
-

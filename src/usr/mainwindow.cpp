@@ -837,8 +837,25 @@ void MainWindow::populateToonList()
                     return;
                 }
                 QByteArray data = reply->readAll();
+
+                // Sniff the format from magic bytes so Qt routes to the right image
+                // plugin even when the server returns a generic Content-Type.
+                // WebP: first 4 bytes == "RIFF", bytes 8-11 == "WEBP"
+                const char* fmt = nullptr;
+                if(data.size() >= 12 &&
+                   data[0]=='R' && data[1]=='I' && data[2]=='F' && data[3]=='F' &&
+                   data[8]=='W' && data[9]=='E' && data[10]=='B' && data[11]=='P')
+                    fmt = "WEBP";
+
                 QPixmap pix;
-                pix.loadFromData(data);
+                bool ok = fmt ? pix.loadFromData(data, fmt) : pix.loadFromData(data);
+                if(!ok || pix.isNull())
+                {
+                    qDebug() << "Failed to decode toon image" << reply->url().toString()
+                             << "(hint:" << (fmt ? fmt : "auto") << ", bytes:" << data.size() << ")";
+                    reply->deleteLater();
+                    return;
+                }
                 image->setPixmap(pix.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation));
                 reply->deleteLater();
             });
@@ -898,9 +915,21 @@ void MainWindow::loadSelectedToonImg(const QString& url, QLabel* label, QLabel* 
     {
         if (reply->error() == QNetworkReply::NoError)
         {
+            QByteArray data = reply->readAll();
+
+            // Same magic-byte sniff as in populateToonList
+            const char* fmt = nullptr;
+            if(data.size() >= 12 &&
+               data[0]=='R' && data[1]=='I' && data[2]=='F' && data[3]=='F' &&
+               data[8]=='W' && data[9]=='E' && data[10]=='B' && data[11]=='P')
+                fmt = "WEBP";
+
             QPixmap pix;
-            pix.loadFromData(reply->readAll());
-            label->setPixmap(pix.scaled(label->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+            bool ok = fmt ? pix.loadFromData(data, fmt) : pix.loadFromData(data);
+            if(ok && !pix.isNull())
+                label->setPixmap(pix.scaled(label->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+            else
+                qDebug() << "Failed to decode selected toon image (hint:" << (fmt ? fmt : "auto") << ")";
         }
         else
         {

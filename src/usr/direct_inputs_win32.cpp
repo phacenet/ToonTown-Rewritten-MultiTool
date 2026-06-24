@@ -44,6 +44,9 @@ static LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
         PostQuitMessage(0);
         return 1; // eat the click
     }
+    // Re-apply crosshair on every move so target windows can't reset it via WM_SETCURSOR
+    if(nCode >= 0 && wParam == WM_MOUSEMOVE)
+        SetCursor(LoadCursor(nullptr, IDC_CROSS));
     return CallNextHookEx(g_mouseHook, nCode, wParam, lParam);
 }
 
@@ -53,9 +56,16 @@ namespace dir_inp
     {
         Sleep(300); // same delay as the X11 version
 
+        // Show a crosshair so the user knows to click a target window
+        HCURSOR oldCursor = SetCursor(LoadCursor(nullptr, IDC_CROSS));
+
         g_clickedWindow = nullptr;
         g_mouseHook = SetWindowsHookEx(WH_MOUSE_LL, mouseProc, nullptr, 0);
-        if(!g_mouseHook) return 0;
+        if(!g_mouseHook)
+        {
+            SetCursor(oldCursor);
+            return 0;
+        }
 
         MSG msg;
         while(GetMessage(&msg, nullptr, 0, 0))
@@ -66,6 +76,7 @@ namespace dir_inp
 
         UnhookWindowsHookEx(g_mouseHook);
         g_mouseHook = nullptr;
+        SetCursor(oldCursor); // restore whatever was set before
 
         return reinterpret_cast<long>(g_clickedWindow);
     }
