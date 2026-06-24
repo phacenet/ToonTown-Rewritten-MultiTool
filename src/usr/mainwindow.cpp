@@ -89,20 +89,23 @@ MainWindow::MainWindow(QWidget* parent)
     //cursor focus
     ui->username_input->setFocus();
 
-    // line edit default text, load username and password from bin if stored
+    // Always set placeholder text first so it shows on every path —
+    // including fresh installs where no credential file exists yet.
+    // If credentials are found below, setText overrides the placeholder normally.
+    ui->username_input->setPlaceholderText("Enter your username...");
+    ui->password_input->setPlaceholderText("Enter your password...");
+
+    // Load saved username and password from bin if stored
     try
     {
         if(enc::readState_fromFile())
         {
             ui->storeLoginCheckbox->toggle();
             m_dontStoreCreds = true;
-            ui->username_input->setPlaceholderText("Enter your username...");
-            ui->password_input->setPlaceholderText("Enter your password...");
         }
         else
         {
-            enc::ToonHQLogin fetchedCreds;
-            fetchedCreds = enc::fetch_creds(m_loginsPath.keyPath, m_loginsPath.credPath);
+            enc::ToonHQLogin fetchedCreds = enc::fetch_creds(m_loginsPath.keyPath, m_loginsPath.credPath);
             if(!fetchedCreds.username.empty() && !fetchedCreds.password.empty())
             {
                 ui->username_input->setText(QString::fromStdString(fetchedCreds.username));
@@ -112,9 +115,8 @@ MainWindow::MainWindow(QWidget* parent)
     }
     catch(const std::exception& e)
     {
-        //Credential file is corrupt or key mismatch - reset gracefully instead of aborting
-        ui->username_input->setPlaceholderText("Enter your username...");
-        ui->password_input->setPlaceholderText("Enter your password...");
+        // Credential file is corrupt or key mismatch — reset gracefully.
+        // Placeholder text is already set above so no need to repeat it here.
         ui->statusLabel->setStyleSheet("color: red;");
         ui->statusLabel->setText(QString("Credential load error: ") + e.what());
     }
