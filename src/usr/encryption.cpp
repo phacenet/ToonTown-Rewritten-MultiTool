@@ -48,6 +48,9 @@ namespace enc
 
 	void generate_keyfile(const std::string& keypath)
 	{
+		std::filesystem::path ky_path = keypath;
+		std::filesystem::create_directories(ky_path.parent_path()); //does nothing if they already exist
+
 		unsigned char key[crypto_secretbox_KEYBYTES];
 		randombytes_buf(key, sizeof(key));
 		std::ofstream file(keypath, std::ios::binary);
@@ -146,8 +149,8 @@ namespace enc
 
 	void store_numCreds(uint8_t numCredsStored, const std::string& filepath)
 	{
-		if(!std::filesystem::exists(filepath))
-			std::ofstream{filepath};
+		std::filesystem::path fl_path = filepath;
+		std::filesystem::create_directories(fl_path.parent_path()); //does nothing if they already exist
 
 		std::ofstream file(filepath, std::ios::binary);
 		if(!file) throw std::runtime_error("Failed to open " + filepath + " for writing");

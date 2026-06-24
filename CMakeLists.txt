@@ -86,6 +86,13 @@ qt_add_executable(${PROJECT_NAME}
 	src/usr/adblocker.cpp
 )
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${CMAKE_SOURCE_DIR}/config
+		$<TARGET_FILE_DIR:${PROJECT_NAME}>/config
+	COMMENT "Copying config/ to output directory..."
+)
+
 # link libs
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 	CURL::libcurl
