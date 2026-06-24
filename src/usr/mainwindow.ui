@@ -263,11 +263,16 @@ QCheckBox::indicator::checked::hover
       <widget class="QLabel" name="statusLabel">
        <property name="geometry">
         <rect>
-         <x>350</x>
-         <y>290</y>
-         <width>191</width>
+         <x>210</x>
+         <y>300</y>
+         <width>421</width>
          <height>41</height>
         </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+    qproperty-alignment: 'AlignCenter';
+}</string>
        </property>
        <property name="text">
         <string/>

@@ -1,13 +1,24 @@
+#include "mainwindow.hpp"
+#include "ttr_api_reqs.hpp"
+
 #include <curl/curl.h>
 #include <QApplication>
 #include <sodium.h>
 #include <QMessageBox>
-
-#include "mainwindow.hpp"
-#include "ttr_api_reqs.hpp"
+#include <filesystem>
 
 int main(int argc, char* argv[])
 {
+	#ifdef _WIN32
+		//set CWD to exe directory so all relative config/... paths resolve correctly regardless of where windows launches the process from
+		std::filesystem::current_path(
+			std::filesystem::path(argv[0]).parent_path()
+		);
+	#endif
+
+	//QApplication must exists before and messagebox
+	QApplication app(argc, argv);
+
 	try 
 	{
 		if(sodium_init() == -1)	
@@ -16,9 +27,7 @@ int main(int argc, char* argv[])
 		//try to make the chromium browser a little bit faster on old hardware
 		qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--disable-gpu-compositing");
 
-		QApplication app(argc, argv);
 		MainWindow window;
-
 		window.show();
 		
 		return app.exec();

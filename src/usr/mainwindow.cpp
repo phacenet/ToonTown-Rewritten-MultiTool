@@ -683,36 +683,73 @@ void MainWindow::attemptLogin()
 void MainWindow::submitPressed(const std::string& uName, const std::string& pWord)
 {
     std::cout << "Submit button was pressed\n";
-    m_orig_csrftoken = ttr::retrieve_csrftoken();
-    std::optional<ttr::ToonHQLoginResult> login_result = ttr::login_request(m_orig_csrftoken, uName, pWord);
-    if(login_result)
+
+    // Disable the button for the duration of the request so double-clicks
+    // can't queue a second login attempt.
+    ui->submitBtn->setEnabled(false);
+    ui->statusLabel->setStyleSheet("color: white;");
+    ui->statusLabel->setText("Logging in...");
+
+    // retrieve_csrftoken() and login_request() are both blocking CURL calls.
+    // Calling them directly on the main thread blocks Qt's event loop, which
+    // causes the "exception thrown from an event handler" / QWidget assert on
+    // Windows (Qt catches the propagating exception from inside the signal
+    // dispatch and re-throws, which terminates). Move the work off-thread and
+    // marshal the result back via QMetaObject::invokeMethod.
+    std::thread([this, uName, pWord]()
     {
-        m_toonTown_loginStruct = *login_result;
-       
-        if(m_dontStoreCreds)
+        try
         {
-            enc::storeState_toFile();
-            std::string credpath = "config/ToonHQLogin/credentials.bin";
-            if(std::filesystem::exists(credpath))
-                std::filesystem::remove(credpath);
-            Q_EMIT loginAuthenticated();
+            std::string csrftoken = ttr::retrieve_csrftoken();
+            std::optional<ttr::ToonHQLoginResult> login_result =
+                ttr::login_request(csrftoken, uName, pWord);
+
+            QMetaObject::invokeMethod(this, [this, uName, pWord, csrftoken, login_result]()
+            {
+                ui->submitBtn->setEnabled(true);
+
+                if(login_result)
+                {
+                    m_orig_csrftoken = csrftoken;
+                    m_toonTown_loginStruct = *login_result;
+
+                    if(m_dontStoreCreds)
+                    {
+                        enc::storeState_toFile();
+                        std::string credpath = "config/ToonHQLogin/credentials.bin";
+                        if(std::filesystem::exists(credpath))
+                            std::filesystem::remove(credpath);
+                        Q_EMIT loginAuthenticated();
+                    }
+                    else
+                    {
+                        std::string user_data = uName + '\n' + pWord;
+                        unsigned char key[crypto_secretbox_KEYBYTES];
+                        enc::load_keyfile(m_loginsPath.keyPath, key);
+                        enc::encrypt_to_file(user_data, m_loginsPath.credPath, key);
+                        enc::delete_storeState();
+                        Q_EMIT loginAuthenticated();
+                    }
+                }
+                else
+                {
+                    Q_EMIT loginFailed();
+                }
+            }, Qt::QueuedConnection);
         }
-        else
+        catch(const std::exception& e)
         {
-            std::string user_data = uName + '\n' + pWord;
-            unsigned char key[crypto_secretbox_KEYBYTES];
-            enc::load_keyfile(m_loginsPath.keyPath, key);
-            enc::encrypt_to_file(user_data, m_loginsPath.credPath, key);
-            //remove storeData file
-            enc::delete_storeState();
-            Q_EMIT loginAuthenticated();
-            return;
+            // Capture message by value so it's safe to use in the lambda
+            // after the catch block unwinds.
+            std::string msg = e.what();
+            QMetaObject::invokeMethod(this, [this, msg]()
+            {
+                ui->submitBtn->setEnabled(true);
+                ui->statusLabel->setStyleSheet("color: red;");
+                ui->statusLabel->setText(QString("Login error: ") + QString::fromStdString(msg));
+            }, Qt::QueuedConnection);
         }
-    }
-    else
-    {
-        Q_EMIT loginFailed();
-    }
+    }).detach();
 }
 
 void MainWindow::populateToonList()
