@@ -139,6 +139,18 @@ A **ToonTown Rewritten** (partial CC support) MultiTool for **Linux and Windows*
 
 ---
 
+## Background
+- The app has not been extensively tested, and there might be bugs or unexpected crashes. If you encounter a bug, or have an idea for an improvement/future feature, feel free to reach out and let me know :)
+- I originally wrote this for myself and my brother, to ease some of the painpoints of playing ToonTown in the modern era. ToonHQ is essential to play the game efficiently, and we both felt it would be
+  nice to have a simple way to access ToonHQ, as well as other frequently used tools from one common location. Thus CJ's ToonTown MultiTool was born!
+- Currently the control configurations are hard coded, but can easily be extended to support other control schemes. More logins could also be stored, but because of the locked window size, for the sake of button readability, I locked it at 3 for now,
+  although it could be extended in the future to support more stored logins.
+- Some features are against T.O.S for ToonTown, and hence their usage falls solely upon you. I do not endorse shortcuts and/or cheating, but believe everyone should make their own choice how they play the game.
+- Enjoy, and reach out with any concerns or suggestions, and Happy ToonTowning!
+
+---
+
+
 ## License
 
 [MIT](LICENSE) © phacenet
