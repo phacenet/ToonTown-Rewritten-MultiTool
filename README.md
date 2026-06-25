@@ -2,6 +2,7 @@
   <img src="config/icons/CJ_v2.png" alt="ToonTown MultiTool" width="480">
 </p>
 
+# CJ's ToonTown MultiTool
 A **ToonTown Rewritten** (partial CC support) MultiTool for **Linux and Windows**.
 
 <!-- Hero screenshot goes here. Suggested: top-of-app multitoon tab with
