@@ -175,7 +175,7 @@ namespace enc
 		if(!file.read(reinterpret_cast<char*>(&num), sizeof(num)))
 			throw std::runtime_error("Failed to read numCreds");
 		
-		std::cout << "read num as: " << static_cast<int>(num) << '\n';
+		//std::cout << "read num as: " << static_cast<int>(num) << '\n';
 		return num;
 	}
 

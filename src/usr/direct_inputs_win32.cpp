@@ -29,6 +29,7 @@ static UINT keysymToVK(unsigned int keysym)
         case 0xFF0D: return VK_RETURN;     // KEY_RETURN
         case 0xFFBE: return VK_F1;         // KEY_F1
         case 0xFFC0: return VK_F3;         // KEY_F3
+        case 0xFFFF: return VK_DELETE;      //KEY DEL
         default:     return 0;
     }
 }

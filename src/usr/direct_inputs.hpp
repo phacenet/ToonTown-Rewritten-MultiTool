@@ -26,6 +26,7 @@ namespace dir_inp
     constexpr unsigned int KEY_RETURN = 0xFF0D;
     constexpr unsigned int KEY_F3 = 0xFFC0;
     constexpr unsigned int KEY_F1 = 0xFFBE;
+    constexpr unsigned int KEY_DELETE = 0xFFFF;
 
     long get_window_via_click();
     void send_key_to_window(long window_id, unsigned int key, bool press);

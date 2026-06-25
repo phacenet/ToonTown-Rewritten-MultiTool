@@ -71,7 +71,7 @@ foreach(sio_target sioclient sioclient_tls)
 endforeach()
 
 #cpp files
-qt_add_executable(${PROJECT_NAME}
+qt_add_executable(${PROJECT_NAME} WIN32
 	src/usr/mainwindow.ui
 	src/usr/mainwindow.hpp
 	src/usr/mainwindow.cpp

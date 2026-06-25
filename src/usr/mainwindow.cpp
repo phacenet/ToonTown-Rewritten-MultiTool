@@ -304,7 +304,8 @@ MainWindow::MainWindow(QWidget* parent)
                             dir_inp::KEY_LEFT, dir_inp::KEY_RIGHT,
                             dir_inp::KEY_SPACE, dir_inp::KEY_ESCAPE,
                             dir_inp::KEY_ALT_L, dir_inp::KEY_ALT_R,
-                            dir_inp::KEY_HOME, dir_inp::KEY_END
+                            dir_inp::KEY_HOME, dir_inp::KEY_END,
+                            dir_inp::KEY_DELETE
                         };
 
                         // track previous state for each key so we detect edges
@@ -377,7 +378,8 @@ MainWindow::MainWindow(QWidget* parent)
                     dir_inp::KEY_s, dir_inp::KEY_d,
                     dir_inp::KEY_SPACE, dir_inp::KEY_ESCAPE,
                     dir_inp::KEY_ALT_L, dir_inp::KEY_ALT_R,
-                    dir_inp::KEY_HOME, dir_inp::KEY_END
+                    dir_inp::KEY_HOME, dir_inp::KEY_END,
+                    dir_inp::KEY_DELETE
                 };
                 std::vector<bool> prev(keys.size(), false);
 
@@ -488,15 +490,15 @@ MainWindow::MainWindow(QWidget* parent)
                     m_doodleTrainThread.join();
                 ui->current_trickLabel->setText("Not currently training");
             });
-    connect(ui->grab_coordsBtn, &QPushButton::pressed, this, [this]()
-            {
-                long window_id = dir_inp::get_window_via_click();
+    //connect(ui->grab_coordsBtn, &QPushButton::pressed, this, [this]()
+    //        {
+    //            long window_id = dir_inp::get_window_via_click();
 
-                if(window_id == 0) return;
-                std::this_thread::sleep_for(std::chrono::seconds(3));
-                 auto pos = dir_inp::get_mouse_pos_in_window(window_id);
-                 std::cout << "local coords: " << pos.x << ", " << pos.y << '\n';
-            });
+    //            if(window_id == 0) return;
+    //            std::this_thread::sleep_for(std::chrono::seconds(3));
+    //             auto pos = dir_inp::get_mouse_pos_in_window(window_id);
+    //             std::cout << "local coords: " << pos.x << ", " << pos.y << '\n';
+    //        });
                 /*
                 long window_id = dir_inp::get_window_via_click();
                 std::cout << "retrieved window_id as: " << window_id << '\n';
@@ -684,8 +686,6 @@ void MainWindow::attemptLogin()
 
 void MainWindow::submitPressed(const std::string& uName, const std::string& pWord)
 {
-    std::cout << "Submit button was pressed\n";
-
     // Disable the button for the duration of the request so double-clicks
     // can't queue a second login attempt.
     ui->submitBtn->setEnabled(false);
@@ -1073,7 +1073,7 @@ void MainWindow::state_registeredLoad(uint8_t how_many)
     ui->status_label_3->hide();
 
 
-    std::cout << "decrypting with m_numCreds = " << static_cast<int>(m_numCreds) << '\n';
+    //std::cout << "decrypting with m_numCreds = " << static_cast<int>(m_numCreds) << '\n';
     std::vector<enc::ToontownLogins> tmp_login_struct = enc::fetch_toontownCreds(m_toontownLoginsPath.keyPath, m_toontownLoginsPath.credPath, m_numCreds);
 
     switch(how_many)
@@ -2300,11 +2300,11 @@ void MainWindow::pollInvasions()
     std::thread([this]()
     {
         auto result = ttr::fetchInvasions();
-        std::cout << "pollInvasions got " << result.size() << " invasions\n";
+        //std::cout << "pollInvasions got " << result.size() << " invasions\n";
         QMetaObject::invokeMethod(this, [this, result]()
         {
             m_invasions = result;
-            std::cout << "m_invasions now has " << m_invasions.size() << " entries\n";
+            //std::cout << "m_invasions now has " << m_invasions.size() << " entries\n";
             populateInvasionList();
             ui->invasionCounterLabel->setText(QString::fromStdString(std::to_string(m_invasions.size())));
         }, Qt::QueuedConnection);
