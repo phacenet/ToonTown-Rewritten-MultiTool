@@ -129,18 +129,17 @@ A **ToonTown Rewritten** (partial CC support) MultiTool for **Linux and Windows*
   </p>
 ---
 
-## Install
+## Security
+- Sensitive credentials, such as the ToonHQ login (if you choose to store it) and your ToonTown login credentials are encrypted using libsodium and **ONLY** stored locally on your device.
+- Your login information is stored encrypted in the *config/ToonHQLogin/* AND *config/ToontownLogin/* directories.
+- Absolutely no information is shared or sent externally. It is encrypted using crypto_secretbox and EXCLUSIVELY stored on your device. A key is generated at creation, and can only your login credentials can only be unencrypted with that key.
+  Any tampering or altering of the key will result in an error and prevent login. If you accidentally modify this, you can simply navigate to the aforementioned folders and delete all .bin files from within them, or simply reinstall the tool.
+- If you are curious about how the encryption is done, navigate to the src/usr/encryption.cpp and .hpp files and take a look yourself.
 
-
-
-## Usage
-
-
-```
-```
+---
 
 ## License
 
 [MIT](LICENSE) © Richard Littauer
 
-by **flossbud**
+by **phacenet**
