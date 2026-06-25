@@ -140,6 +140,4 @@ A **ToonTown Rewritten** (partial CC support) MultiTool for **Linux and Windows*
 
 ## License
 
-[MIT](LICENSE) © Richard Littauer
-
-by **phacenet**
+[MIT](LICENSE) © phacenet
