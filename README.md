@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="config/icons/CJ_v2.png" alt="ToonTown MultiTool" width="480">
+  <img src="https://github.com/user-attachments/assets/92284dd3-cdd5-4cde-8352-facde5a31d08" alt="ToonTown MultiTool" width="480">
 </p>
 
 # CJ's ToonTown MultiTool
